@@ -1,6 +1,6 @@
 # fun_projects
 
-<img src="snake_game/snake_game.gif" width="300" height="300" />
+<img src="snakegame/snake_game_loop.gif" width="300" height="300" />
 
 
 
