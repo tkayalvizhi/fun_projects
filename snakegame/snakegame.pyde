@@ -134,6 +134,8 @@ def draw():
     snake.show()
     snake.check_self_bite()
     
+    saveFrame(10)
+    
     
     
     
