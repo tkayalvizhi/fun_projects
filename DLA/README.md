@@ -26,8 +26,8 @@ the particle and the aggregated particles before the random walk begins.
  ![dla_1](simulation_results/sim_1_loop.gif "stickiness=1.0")
  * [sim2](simulation_results/sim2) -  stickiness factor = 0.1, max_dist = 500, iterations = 2000
  ![dla_1](simulation_results/sim_2_loop.gif "stickiness=1.0")
-  * [sim3](simulation_results/sim3) -  stickiness factor = 0.1, max_dist = 500, iterations = 2000
- ![dla_1](simulation_results/sim_2_loop.gif "stickiness=1.0")
+  * [sim3](simulation_results/sim3) -  stickiness factor = 0.05, max_dist = 500, iterations = 2000
+ ![dla_1](simulation_results/sim_3_loop.gif "stickiness=1.0")
  
  
  ## Approaches
@@ -50,6 +50,5 @@ the particle and the aggregated particles before the random walk begins.
    For a given particle, the BST can get the nearest aggregated particle or the distance to the nearest aggregated particle.
    
    This enhances the speed of simulation, as the starting pixel is not too far away.  
-    ![dla_1](simulation_results/39996.png "stickiness=1.0")
 
  
