@@ -41,7 +41,7 @@ class DlaSimulation(object):
         self.master.mainloop()
 
     def run(self, iterations, frame_rate, folder_name):
-        step = 0
+        # step = 0
         for matrix, count in self.field.random_walk(iterations):
 
             img = Image.fromarray(transform_matrix(matrix))
@@ -50,19 +50,24 @@ class DlaSimulation(object):
             self.canvas.create_image(0, 0, image=imgTk, anchor='nw')
             self.master.update()
 
-            save(img, step, folder_name)
-            step += 1
+            # save(img, step, folder_name)
+            # step += 1
 
-            # if count % frame_rate == 0:
-            #     self.save(img, count, folder_name)
+            if count % frame_rate == 0:
+                save(img, count, folder_name)
 
 
 if __name__ == "__main__":
+    if sys.argv[7].lower() == 'true':
+        from_edge = True
+    else:
+        from_edge = False
     DlaSimulation(dimension=int(sys.argv[1]),
                   stickiness=float(sys.argv[2]),
                   drift=float(sys.argv[3]),
                   max_dist=int(sys.argv[4]),
                   iterations=int(sys.argv[5]),
                   folder_name=sys.argv[6],
-                  from_edge=bool(sys.argv[7])
+                  from_edge=from_edge,
+                  frame_rate=int(sys.argv[8])
                   )

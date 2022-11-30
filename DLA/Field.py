@@ -1,14 +1,16 @@
 import numpy as np
 from Particle import Particle
 from BST import BinarySearchTree
+from bisect import bisect_right, bisect_left
 
 UP = 0
 RIGHT = 1
 DOWN = 2
 LEFT = 3
 
+NW, N, NE, E, SE, S, SW, W = (i for i in range(8))
 
-NUM_DIRECTIONS = 4
+NUM_DIRECTIONS = 8
 SAVE = True
 
 
@@ -58,26 +60,17 @@ class Field(object):
         The direction depends on the transition probability.
         :return: particle after taking a random step
         """
-
         self.del_from_matrix(particle)
 
         pmf = self.get_transition_probabilities(particle)
-        cdf = np.cumsum(self.add_drift(pmf, particle))
 
-        value = np.random.random()
+        # if not all neighbouring pixels are occupied by aggregated particles
+        if np.sum(pmf) != 0:
+            cdf = np.cumsum(self.add_drift(pmf, particle))
+            value = np.random.random()
+            direction = bisect_left(cdf, value)
+            particle.move(direction)
 
-        if value < cdf[0]:
-            direction = UP
-        elif value < cdf[1]:
-            direction = RIGHT
-        elif value < cdf[2]:
-            direction = DOWN
-        elif value < cdf[3]:
-            direction = LEFT
-        else:
-            direction = -1  # STAY
-
-        particle.move(direction)
         self.add_to_matrix(particle)
 
         return particle
@@ -176,12 +169,8 @@ class Field(object):
         :return: (list) of probabilites of transitioning to either of the 4 neighbouring pixels in the order
         [UP, RIGHT, DOWN, LEFT]
         """
-        trans_prob = np.zeros(4)
-        for direction, nbr_pos in enumerate(particle.get_nbr_positions()):
-            if self.matrix[nbr_pos] == 0:
-                trans_prob[direction] = 1
-            else:
-                trans_prob[direction] = 0
+        nbrs = particle.get_nbr_positions()
+        trans_prob = np.array([1 - self.matrix[nbrs[i]] for i in range(NUM_DIRECTIONS)])
 
         if np.sum(trans_prob) != 0:
             return trans_prob / np.sum(trans_prob)
@@ -210,13 +199,13 @@ class Field(object):
         """
         pos_x, pos_y = particle.get_position()
         if pos_x < self.C:
-            trans_prob[RIGHT] *= (trans_prob[RIGHT] + self.drift)
+            trans_prob[[NE, E, SE]] *= (trans_prob[[NE, E, SE]] + self.drift)
         else:
-            trans_prob[LEFT] *= (trans_prob[LEFT] + self.drift)
+            trans_prob[[NW, W, SW]] *= (trans_prob[[NW, W, SW]] + self.drift)
         if pos_y < self.C:
-            trans_prob[DOWN] *= (trans_prob[DOWN] + self.drift)
+            trans_prob[[SE, S, SW]] *= (trans_prob[[SE, S, SW]] + self.drift)
         else:
-            trans_prob[UP] *= (trans_prob[UP] + self.drift)
+            trans_prob[[NE, N, NW]] *= (trans_prob[[NE, N, NW]] + self.drift)
 
         if np.sum(trans_prob) != 0:
             return trans_prob / np.sum(trans_prob)

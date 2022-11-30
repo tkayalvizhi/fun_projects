@@ -1,8 +1,3 @@
-UP = 0
-RIGHT = 1
-DOWN = 2
-LEFT = 3
-
 X = 0
 Y = 1
 
@@ -23,6 +18,9 @@ class Particle:
             raise Exception("y - axis value must be between 0 and M")
 
         self.pos = [x, y]
+        self.update_list = [[-1, -1], [0, -1], [1, -1],
+                            [-1, 0], [1, 0],
+                            [-1, 1], [0, 1], [1, 1]]
 
     def get_position(self):
         """
@@ -39,16 +37,11 @@ class Particle:
         :param direction: (int) 0 - UP, 1 - RIGHT, 2 - DOWN, 3 - LEFT
         :return: None
         """
-        if direction == UP:
-            self.pos[Y] = (self.pos[Y] - 1) % self.M
-        elif direction == RIGHT:
-            self.pos[X] = (self.pos[X] + 1) % self.M
-        elif direction == DOWN:
-            self.pos[Y] = (self.pos[Y] + 1) % self.M
-        elif direction == LEFT:
-            self.pos[X] = (self.pos[X] - 1) % self.M
-        else:
-            return
+        update = self.update_list[direction]
+
+        self.pos[X] = (self.pos[X] + update[X]) % self.M
+        self.pos[Y] = (self.pos[Y] + update[Y]) % self.M
+
 
     @classmethod
     def from_index(cls, index, M):
@@ -69,7 +62,12 @@ class Particle:
         a particle moving off the right edge enters on the left, similarly for top and bottom.
         :return:
         """
-        return [(self.pos[X], int((self.pos[Y] - 1) % self.M)),  # Upward neighbour
-                (int((self.pos[X] + 1) % self.M), self.pos[Y]),  # Rightward neighbour
-                (self.pos[X], int((self.pos[Y] + 1) % self.M)),  # Downward neighbour
-                (int((self.pos[X] - 1) % self.M), self.pos[Y])]  # Leftward neighbour
+        x, y = self.pos
+        up = int((y - 1) % self.M)
+        down = int((y + 1) % self.M)
+        left = int((x - 1) % self.M)
+        right = int((x + 1) % self.M)
+
+        return [(left, up), (x, up), (right, up),
+                 (left, y), (right, y),
+                 (left, down), (x, down), (right, down)]
