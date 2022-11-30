@@ -14,7 +14,7 @@ SAVE = True
 
 class Field(object):
 
-    def __init__(self, dim: int, stickiness: float = 1, drift: float = 0.1, max_dist=200):
+    def __init__(self, dim: int, stickiness: float = 1, drift: float = 0.1, max_dist=200, from_edge=False):
         """
         The Field / Image class that dictates the particle movements and aggregation.
         :param dim: (int) width / height of Field -
@@ -37,6 +37,7 @@ class Field(object):
         self.stickiness = stickiness
         self.drift = drift
         self.max_dist = max_dist
+        self.from_edge = from_edge
 
         # matrix indicating if pixel is occupied
         self.matrix = np.zeros(shape=(self.M, self.M))
@@ -97,11 +98,12 @@ class Field(object):
             while not self.aggregated_particles.contains(particle.pos):
                 yield self.matrix, count
 
-                # if particle is far from the aggregated particles
-                if self.is_outlier(particle):
-                    # delete particle and start over again
-                    self.del_from_matrix(particle)
-                    break
+                if not self.from_edge:
+                    # if particle is far from the aggregated particles
+                    if self.is_outlier(particle):
+                        # delete particle and start over again
+                        self.del_from_matrix(particle)
+                        break
 
                 # particle takes a random step
                 particle = self.random_step(particle)
@@ -137,20 +139,19 @@ class Field(object):
         :return: (Particle) a particle.
         """
         index = self.gen_index()
-        while self.aggregated_particles.nearest_neighbour([index % self.M, index // self.M]) < 25:
-            index = self.gen_index()
+        if not self.from_edge:
+            while self.aggregated_particles.nearest_neighbour([index % self.M, index // self.M]) < 25:
+                index = self.gen_index()
 
         particle = Particle.from_index(index, self.M)
         self.matrix[particle.get_position()] = 1
         return particle
 
-    def gen_index(self, boundary=False):
+    def gen_index(self):
         """
-        :param boundary: (bool) is an indicator to denote if the points need
-         to be generated from the boundary or anywhere randomly from the Field
         :return:
         """
-        if boundary:
+        if self.from_edge:
             return np.random.choice(self.boundary_indices, 1)
         else:
             return np.random.randint(0, self.M * self.M)

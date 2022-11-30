@@ -2,10 +2,16 @@ from tkinter import *
 from PIL import Image, ImageTk
 from Field import Field
 import sys
+import os
 
 
 def transform_matrix(matrix):
     return 255 - matrix * 255
+
+
+def save(img, count, folder_name):
+    img = img.convert("L")
+    img.save(folder_name + '/' + f'img_{str(count).zfill(5)}.png')
 
 
 class DlaSimulation(object):
@@ -15,22 +21,27 @@ class DlaSimulation(object):
                  max_dist=500,
                  frame_rate=100,
                  iterations=40000,
-                 folder_path: str = 'frames'):
+                 folder_name: str = 'frames',
+                 from_edge=False):
 
         self.master = Tk()
         self.master.update()
         self.field = Field(dim=dimension,
                            stickiness=stickiness,
                            drift=drift,
-                           max_dist=max_dist)
+                           max_dist=max_dist,
+                           from_edge=from_edge)
+
+        if not os.path.isdir(folder_name + '/'):
+            os.mkdir(folder_name + '/')
 
         self.canvas = Canvas(self.master, width=dimension, height=dimension)
         self.canvas.pack()
-        self.run(iterations, frame_rate, folder_path)
+        self.run(iterations, frame_rate, folder_name)
         self.master.mainloop()
 
-    def run(self, iterations, frame_rate, folder_path):
-
+    def run(self, iterations, frame_rate, folder_name):
+        step = 0
         for matrix, count in self.field.random_walk(iterations):
 
             img = Image.fromarray(transform_matrix(matrix))
@@ -39,12 +50,11 @@ class DlaSimulation(object):
             self.canvas.create_image(0, 0, image=imgTk, anchor='nw')
             self.master.update()
 
-            if count % frame_rate == 0:
-                self.save(img, count, folder_path)
+            save(img, step, folder_name)
+            step += 1
 
-    def save(self, img, count, folder_path):
-        img = img.convert("L")
-        img.save(folder_path + f'/img_{str(count).zfill(5)}.png')
+            # if count % frame_rate == 0:
+            #     self.save(img, count, folder_name)
 
 
 if __name__ == "__main__":
@@ -53,5 +63,6 @@ if __name__ == "__main__":
                   drift=float(sys.argv[3]),
                   max_dist=int(sys.argv[4]),
                   iterations=int(sys.argv[5]),
-                  folder_path=sys.argv[6]
+                  folder_name=sys.argv[6],
+                  from_edge=bool(sys.argv[7])
                   )
