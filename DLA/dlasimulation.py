@@ -15,7 +15,7 @@ class DlaSimulation(object):
                  max_dist=500,
                  frame_rate=100,
                  iterations=40000,
-                 folder_path: str = 'frames/'):
+                 folder_path: str = 'frames'):
 
         self.master = Tk()
         self.master.update()
@@ -44,7 +44,7 @@ class DlaSimulation(object):
 
     def save(self, img, count, folder_path):
         img = img.convert("L")
-        img.save(folder_path + f'img_{str(count).zfill(5)}.png')
+        img.save(folder_path + f'/img_{str(count).zfill(5)}.png')
 
 
 if __name__ == "__main__":

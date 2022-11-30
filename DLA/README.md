@@ -3,9 +3,9 @@
 ![dla_1](simulation_results/sim_1_loop.gif "stickiness=1.0")
 
 Run:
-`python dlasimulation.py dimension stickiness drift max_dist`
+`python dlasimulation.py dimension stickiness drift max_dist iteration folder_path`
 
-Example: ``python dlasimulation.py 501 0.5 2 500 40000``
+Example: ``python dlasimulation.py 501 0.5 2 500 40000 'frames'``
 
 * dimension - (integer) starting from 501. Dimension of Image or Field
 * stickiness - (float) between 0 and 1. float) the stickiness factor which determines the probability of a particle aggregating
@@ -28,6 +28,8 @@ the particle and the aggregated particles before the random walk begins.
  ![dla_1](simulation_results/sim_2_loop.gif "stickiness=1.0")
   * [sim3](simulation_results/sim3) -  stickiness factor = 0.05, max_dist = 500, iterations = 2000
  ![dla_1](simulation_results/sim_3_loop.gif "stickiness=1.0")
+   * [sim4](simulation_results/sim4) -  stickiness factor = 0.5, max_dist = 500, iterations = 3500
+ ![dla_1](simulation_results/sim_4_loop.gif "stickiness=1.0")
  
  
  ## Approaches
