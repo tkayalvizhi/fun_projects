@@ -1,6 +1,5 @@
 # Diffusion Limited Aggregation Simulation
-
-![dla_1](simulation_results/sim_1_loop.gif "stickiness=1.0")
+<img src="simulation_results/sim_1_loop.gif" width="300" height="300" />
 
 Run:
 `python dlasimulation.py dimension stickiness drift max_dist iteration folder_path`
@@ -20,23 +19,12 @@ the particle and the aggregated particles before the random walk begins.
  * [DlaSimulation](dlasimulation.py) - DlaSimulation simulates the Diffusion Limited Aggregation and stores 
  images at regular intervals
  * [BinarySearchTree](BST.py) - The BinarySearchTree class is used to store the aggregated particles. It can find the nearest aggregated particle to a given particle. 
- 
- ## [Simulation Results](simulation_results)
- * [sim1](simulation_results/sim1) - stickiness factor = 1, max_dist = 1000, iterations = 2000
- ![dla_1](simulation_results/sim_1_loop.gif "stickiness=1.0")
- * [sim2](simulation_results/sim2) -  stickiness factor = 0.1, max_dist = 500, iterations = 2000
- ![dla_1](simulation_results/sim_2_loop.gif "stickiness=1.0")
-  * [sim3](simulation_results/sim3) -  stickiness factor = 0.05, max_dist = 500, iterations = 2000
- ![dla_1](simulation_results/sim_3_loop.gif "stickiness=1.0")
-   * [sim4](simulation_results/sim4) -  stickiness factor = 0.5, max_dist = 500, iterations = 3500
- ![dla_1](simulation_results/sim_4_loop.gif "stickiness=1.0")
- 
- 
+  
  ## Approaches
  |Approach 1 |Approach 2 A| Approach 2 B| Approach 3|
  |:---:|:---:|:---:|:---:|
  |![dla_1](simulation_results/randomwalk1.gif "low_drift")|![dla_1](simulation_results/randomwalk2.gif "low_drift")|![dla_1](simulation_results/randomwalk2_2.gif "low_drift")|![dla_1](simulation_results/randomwalk3.gif "low_drift")|
-|No drift|Low drift|Higher drift|drift with optimal start|
+|No drift|Low drift|Higher drift|Drift with optimal start|
  ### Naive Approach 
   - The particle starts the random walk from the edge pixels
   - The particle moves to any of the four neighbouring pixels with equal probability.
@@ -61,4 +49,16 @@ the particle and the aggregated particles before the random walk begins.
    
    This enhances the speed of simulation, as the starting pixel of a particle is not too far away.  
 
+ ## [Simulation Results](simulation_results)
+ * [sim1](simulation_results/sim1) - stickiness factor = 1, max_dist = 1000, iterations = 2000
+ <img src="simulation_results/sim_1_loop.gif" width="300" height="300" />
+ 
+ * [sim2](simulation_results/sim2) -  stickiness factor = 0.1, max_dist = 500, iterations = 2000
+ <img src="simulation_results/sim_2_loop.gif" width="300" height="300" />
+ 
+ * [sim3](simulation_results/sim3) -  stickiness factor = 0.05, max_dist = 500, iterations = 2000
+ <img src="simulation_results/sim_3_loop.gif" width="300" height="300" />
+ 
+ * [sim4](simulation_results/sim4) -  stickiness factor = 0.5, max_dist = 500, iterations = 3500
+ <img src="simulation_results/sim_4_loop.gif" width="300" height="300" />
  
