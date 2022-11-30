@@ -67,17 +67,17 @@ def setup():
 
 
 def draw():
-    global count
+    # global count
     background(250)
     check_bounce()
 
     for i in range(num_balls):
         balls[i].move()
     for i in range(num_balls):
-        balls[i].show()
+        balls[i].show_state()
 
-    save_frame(f'frames2/{str(count).zfill(4)}.png')
-    count += 1
+    # save_frame(f'frames2/{str(count).zfill(4)}.png')
+    # count += 1
 
 
 run()
