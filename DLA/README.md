@@ -1,5 +1,5 @@
 # Diffusion Limited Aggregation Simulation
-<img src="simulation_results/sim_best_loop.gif" width="300" height="300" />
+<img src="simulation_results/sim_5_loop.gif" width="300" height="300" />
 
 Run:
 `python dlasimulation.py dimension stickiness drift max_dist iteration folder_path`
