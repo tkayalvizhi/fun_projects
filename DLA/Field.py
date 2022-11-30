@@ -8,6 +8,9 @@ RIGHT = 1
 DOWN = 2
 LEFT = 3
 
+X = 0
+Y = 1
+
 NW, N, NE, E, SE, S, SW, W = (i for i in range(8))
 
 NUM_DIRECTIONS = 8
@@ -53,10 +56,11 @@ class Field(object):
 
         # List of indices along the boundary of the Field.
         self.boundary_indices = self.get_boundary_indices()
+        self.scale = 20
 
     def random_step(self, particle: Particle) -> Particle:
         """
-        The particle takes a random step to go one pixel UP, DOWN, LEFT or RIGHT.
+        The particle takes a random step in the direction of the nearest aggregated particle
         The direction depends on the transition probability.
         :return: particle after taking a random step
         """
@@ -66,9 +70,12 @@ class Field(object):
 
         # if not all neighbouring pixels are occupied by aggregated particles
         if np.sum(pmf) != 0:
-            cdf = np.cumsum(self.add_drift(pmf, particle))
-            value = np.random.random()
-            direction = bisect_left(cdf, value)
+            nearest = self.aggregated_particles.nearest_neighbour(particle.pos)
+            # drift towards nearest aggregated particle
+            cdf = np.cumsum(self.add_drift(pmf, particle, nearest))
+            # sample a direction from the cumulative distribution function of directions
+            direction = bisect_left(cdf, np.random.random())
+            # take a step in the direction
             particle.move(direction)
 
         self.add_to_matrix(particle)
@@ -131,23 +138,16 @@ class Field(object):
         generate_particle generates a particle at a random pixel in the Field.
         :return: (Particle) a particle.
         """
-        index = self.gen_index()
         if not self.from_edge:
-            while self.aggregated_particles.nearest_neighbour([index % self.M, index // self.M]) < 25:
-                index = self.gen_index()
+            index = np.random.randint(0, self.M * self.M)
+            while self.aggregated_particles.nearest_neighbour([index % self.M, index // self.M]) < 5:
+                index = np.random.randint(0, self.M * self.M)
+        else:
+            index = np.random.choice(self.boundary_indices, 1)
 
         particle = Particle.from_index(index, self.M)
         self.matrix[particle.get_position()] = 1
         return particle
-
-    def gen_index(self):
-        """
-        :return:
-        """
-        if self.from_edge:
-            return np.random.choice(self.boundary_indices, 1)
-        else:
-            return np.random.randint(0, self.M * self.M)
 
     def add_to_matrix(self, particle: Particle) -> None:
         """
@@ -182,30 +182,37 @@ class Field(object):
         :param particle: (Particle)
         :return: (int) count
         """
-        count = 0
-        for nbr_pos in particle.get_nbr_positions():
-            if self.matrix[nbr_pos] == 1:
-                count += 1
-        return count
+        nbrs = particle.get_nbr_positions()
+        aggregated_nbrs = np.array([self.matrix[nbrs[i]] for i in range(NUM_DIRECTIONS)])
 
-    def add_drift(self, trans_prob, particle):
+        return int(np.sum(aggregated_nbrs))
+
+    def add_drift(self, trans_prob, particle: Particle, attractor: list = None):
         """
         a drift towards the center, speeds up the aggregation of particles.
         With drift the directions pointing towards the center of the field are preferred more.
-        :param trans_prob: (list) of probabilites of transitioning to either of
-        the 4 neighbouring pixels in the order [UP, RIGHT, DOWN, LEFT].
+        :param attractor:
+        :param trans_prob: (list) of probabilites of transitioning to the 8 neighbouring pixels
         :param particle: (Particle)
         :return: transition probabilites with drift.
         """
-        pos_x, pos_y = particle.get_position()
-        if pos_x < self.C:
-            trans_prob[[NE, E, SE]] *= (trans_prob[[NE, E, SE]] + self.drift)
+        if attractor is None:
+            attractor = self.center.pos
+        pos = particle.get_position()
+
+        if pos[X] < attractor[X]:
+            # push towards east
+            trans_prob[[NE, E, SE]] += trans_prob[[NE, E, SE]] * self.drift
         else:
-            trans_prob[[NW, W, SW]] *= (trans_prob[[NW, W, SW]] + self.drift)
-        if pos_y < self.C:
-            trans_prob[[SE, S, SW]] *= (trans_prob[[SE, S, SW]] + self.drift)
+            # push towards west
+            trans_prob[[NW, W, SW]] += trans_prob[[NW, W, SW]] * self.drift
+
+        if pos[Y] < attractor[Y]:
+            # push towards south
+            trans_prob[[SE, S, SW]] += trans_prob[[SE, S, SW]] * self.drift
         else:
-            trans_prob[[NE, N, NW]] *= (trans_prob[[NE, N, NW]] + self.drift)
+            # push towards north
+            trans_prob[[NE, N, NW]] += trans_prob[[NE, N, NW]] * self.drift
 
         if np.sum(trans_prob) != 0:
             return trans_prob / np.sum(trans_prob)
@@ -217,4 +224,4 @@ class Field(object):
         :param particle: (Particle)
         :return: returns true if particle is outlier and false otherwise
         """
-        return self.aggregated_particles.nearest_neighbour(particle.pos) > self.max_dist
+        return self.aggregated_particles.nearest_neighbour_dist(particle.pos) > self.max_dist

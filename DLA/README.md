@@ -1,5 +1,5 @@
 # Diffusion Limited Aggregation Simulation
-<img src="simulation_results/sim_1_loop.gif" width="300" height="300" />
+<img src="simulation_results/sim_best_loop.gif" width="300" height="300" />
 
 Run:
 `python dlasimulation.py dimension stickiness drift max_dist iteration folder_path`
@@ -38,7 +38,7 @@ the particle and the aggregated particles before the random walk begins.
   The simluation is still slow, as most of the time the particle is random walking far from the center.
 
    
- ### Approach 3
+ ### Approach 3 - drift towards center
    - The particle starts from a random pixel at a certain "max_dist" away from the nearest aggregated particle.
    - The particles also starts at a minimum distance from the aggregated particles
    - The particle moves randomly but in general drifts towards the center
@@ -48,6 +48,11 @@ the particle and the aggregated particles before the random walk begins.
   
    
    This enhances the speed of simulation, as the starting pixel of a particle is not too far away.  
+
+ ### Approach 4 - drift towards nearest aggregated particle
+   - The particle starts from a random pixel at a certain "max_dist" away from the nearest aggregated particle.
+   - The particles also starts at a minimum distance from the aggregated particles
+   - The particle drifts towards the nearest aggregated particle
 
  ## [Simulation Results](simulation_results)
  * [sim1](simulation_results/sim1) - stickiness factor = 1, max_dist = 1000, iterations = 2000

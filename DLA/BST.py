@@ -80,6 +80,11 @@ class BinarySearchTree:
     def nearest_neighbour(self, pos: list):
         nearest = self.__nearest_neighbour__(self.root, pos)
 
+        return nearest.pos
+
+    def nearest_neighbour_dist(self, pos: list):
+        nearest = self.__nearest_neighbour__(self.root, pos)
+
         return nearest.dist_to(pos)
 
     def __closer_distance__(self, pivot, n1: Node, n2: Node):
