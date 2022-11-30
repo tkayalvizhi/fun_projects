@@ -43,6 +43,8 @@ the particle and the aggregated particles before the random walk begins.
    - The particle starts the random walk from the edge pixels
    - The particle moves randomly but in general drifts towards the center
    
+  The simluation is still slow, as most of the time the particle is random walking far from the center.
+   
  ### Approach 3
    - The particle starts from a random pixel at a certain "max_dist" away from the nearest aggregated particle.
    - The particles also starts at a minimum distance from the aggregated particles
