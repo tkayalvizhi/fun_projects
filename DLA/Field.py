@@ -83,9 +83,11 @@ class Field(object):
 
     def random_walk(self, num_iter=40000):
         """
+        random walk is a generator function that performs the random walk for the number of iterations given.
+        It yields the field matrix after each random step.
 
         :param num_iter: number of walks to take
-        :return:
+        :returns: yields current field matrix (ndarray) and the current iteration (int)
         """
         count = 0
         yield self.matrix, count
@@ -95,18 +97,26 @@ class Field(object):
             while not self.aggregated_particles.contains(particle.pos):
                 yield self.matrix, count
 
+                # if particle is far from the aggregated particles
                 if self.is_outlier(particle):
+                    # delete particle and start over again
                     self.del_from_matrix(particle)
                     break
 
+                # particle takes a random step
                 particle = self.random_step(particle)
 
+                # for each neighbouring aggregated particle,
+                # the current particle has "stickiness" probability of getting aggregated
                 for _ in range(self.get_aggregated_nbr_count(particle)):
                     if np.random.random() < self.stickiness:
                         self.add_to_matrix(particle)
                         self.aggregated_particles.insert(particle.pos)
                         break
+
+            # if aggregated
             else:
+                # increment iteration counter
                 count += 1
                 print(f"iteration: {count}")
                 yield self.matrix, count

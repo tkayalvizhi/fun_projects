@@ -15,7 +15,7 @@ the particle and the aggregated particles before the random walk begins.
  If greater the particle is regenerated
  
  ## Objects
- * [Particle](Particle.py) - A particle object performs the random walk. It can move in any of the four cardinal directions depending on the direction specified to it. 
+ * [Particle](Particle.py) - A particle object performs the random walk. Assumption -  It can move in any of the four cardinal directions depending on the direction specified to it. 
  * [Field](Field.py) - Field / "Image" captures the particle movements and aggregation. The Field object allows certain customizations to the particle movements. Initially the field is empty with one particle at the center.
  * [DlaSimulation](dlasimulation.py) - DlaSimulation simulates the Diffusion Limited Aggregation and stores 
  images at regular intervals
@@ -49,6 +49,6 @@ the particle and the aggregated particles before the random walk begins.
    To get the distance from the nearest aggregated particle, a binary search tree (BST) is used to store the aggregated particles. 
    For a given particle, the BST can get the nearest aggregated particle or the distance to the nearest aggregated particle.
    
-   This enhances the speed of simulation, as the starting pixel is not too far away.  
+   This enhances the speed of simulation, as the starting pixel of a particle is not too far away.  
 
  
