@@ -25,22 +25,28 @@ class Field(object):
         :param dim: (int) width / height of Field -
                     also the number of pixels in each row and column of Field
         :param stickiness: (float) the stickiness factor which determines the probability of a particle aggregating
-        :param drift: the factor of drift towards the center
+        :param drift: (float) the factor of drift towards the attractor.
+                    0 -> 0% - no drift
+                    1 -> 100% more - doubles the probability of moving in the direction of the attractor
+                    2 -> 200% more - triples the probability of moving in the direction of the attractor
+        :param max_dist: (int) maximum distance away from the nearest aggregated particle
+        :param from_edge: (bool) indicator for particle to start random walk from edge of field
         """
 
-        if dim < 1:
-            raise Exception("Dimension of image must be larger than or equal to 1")
-
+        if dim < 101:
+            raise Exception("Dimension of image must be larger than or equal to 101")
         if dim % 2 == 0:
             raise Exception("Dimension must be an odd number")
-
         self.M = dim
 
         if stickiness < 0 or stickiness > 1:
-            raise Exception("Sticking factor must be between 0 and 1")
-
+            raise Exception("stickiness is a probability and must be between 0 and 1")
         self.stickiness = stickiness
+
+        if drift < 0:
+            raise Exception("drift must be between 0 and 1")
         self.drift = drift
+
         self.max_dist = max_dist
         self.from_edge = from_edge
 

@@ -1,8 +1,10 @@
+import sys
+import os
+
 from tkinter import *
 from PIL import Image, ImageTk
 from Field import Field
-import sys
-import os
+import numpy as np
 
 
 def transform_matrix(matrix):
@@ -35,6 +37,9 @@ class DlaSimulation(object):
         if not os.path.isdir(folder_name + '/'):
             os.mkdir(folder_name + '/')
 
+        # if not os.path.isdir(folder_name + '/matrix/'):
+        #     os.mkdir(folder_name + '/matrix/')
+
         self.canvas = Canvas(self.master, width=dimension, height=dimension)
         self.canvas.pack()
         self.run(iterations, frame_rate, folder_name)
@@ -55,14 +60,19 @@ class DlaSimulation(object):
 
             if count % frame_rate == 0:
                 save(img, count, folder_name)
+                # np.save(folder_name+"/matrix/matrix.npy")
 
 
 if __name__ == "__main__":
+    dim = int(sys.argv[1])
+    if dim < 101:
+        raise Exception("Minimum field dimension is 101")
+
     if sys.argv[7].lower() == 'true':
         from_edge = True
     else:
         from_edge = False
-    DlaSimulation(dimension=int(sys.argv[1]),
+    DlaSimulation(dimension=dim,
                   stickiness=float(sys.argv[2]),
                   drift=float(sys.argv[3]),
                   max_dist=int(sys.argv[4]),
