@@ -70,3 +70,6 @@ the particle and the aggregated particles before the random walk begins.
   * [sim5](simulation_results/sim5) -  stickiness factor = 0.5, max_dist = 500, iterations = 3500, attractor = nearest neighbour
  <img src="simulation_results/sim_5_loop.gif" width="300" height="300" />
  
+  * [sim6](simulation_results/sim8) -  stickiness factor = 0.2, max_dist = 300, iterations = 3500, attractor = nearest neighbour
+ <img src="simulation_results/sim_8_loop.gif" width="300" height="300" />
+ 

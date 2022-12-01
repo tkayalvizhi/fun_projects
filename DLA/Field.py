@@ -17,6 +17,11 @@ NUM_DIRECTIONS = 8
 SAVE = True
 
 
+class NoValidDirectionError(Exception):
+    """Raised when the particle is surrounded by aggregated particles"""
+    pass
+
+
 class Field(object):
 
     def __init__(self, dim: int, stickiness: float = 1, drift: float = 0.1, max_dist=200, from_edge=False):
@@ -57,35 +62,30 @@ class Field(object):
         # center particle
         self.C = int(self.M / 2)
         self.center = Particle(self.C, self.C, self.M)
-        self.add_to_matrix(self.center)
+        self.matrix[self.center.get_position()] = 1
         self.aggregated_particles.insert(self.center.pos)
 
         # List of indices along the boundary of the Field.
         self.boundary_indices = self.get_boundary_indices()
         self.scale = 20
+        self.count = 0
 
-    def random_step(self, particle: Particle) -> Particle:
+    def random_step(self, particle: Particle):
         """
         The particle takes a random step in the direction of the nearest aggregated particle
         The direction depends on the transition probability.
         :return: particle after taking a random step
         """
-        self.del_from_matrix(particle)
-
-        pmf = self.get_transition_probabilities(particle)
-
-        # if not all neighbouring pixels are occupied by aggregated particles
-        if np.sum(pmf) != 0:
-            nearest = self.aggregated_particles.nearest_neighbour(particle.pos)
-            # drift towards nearest aggregated particle
-            cdf = np.cumsum(self.add_drift(pmf, particle, nearest))
-            # sample a direction from the cumulative distribution function of directions
-            direction = bisect_left(cdf, np.random.random())
-            # take a step in the direction
-            particle.move(direction)
-
-        self.add_to_matrix(particle)
-
+        self.matrix[particle.get_position()] = 0
+        unoccupied_pixels = self.get_unoccupied_nbr_pixels(particle)
+        nearest = self.aggregated_particles.nearest_neighbour(particle.pos)
+        # drift towards nearest aggregated particle
+        cdf = np.cumsum(self.add_drift(unoccupied_pixels, particle, nearest))
+        # sample a direction from the cumulative distribution function of directions
+        direction = bisect_left(cdf, np.random.random())
+        # take a step in the direction
+        particle.move(direction)
+        self.matrix[particle.get_position()] = 1
         return particle
 
     def random_walk(self, num_iter=40000):
@@ -96,38 +96,36 @@ class Field(object):
         :param num_iter: number of walks to take
         :returns: yields current field matrix (ndarray) and the current iteration (int)
         """
-        count = 0
-        yield self.matrix, count
-        while count < num_iter:
+        yield self.matrix, self.count
+        while self.count < num_iter:
             particle = self.generate_particle()
 
             while not self.aggregated_particles.contains(particle.pos):
-                yield self.matrix, count
+                yield self.matrix, self.count
 
-                if not self.from_edge:
-                    # if particle is far from the aggregated particles
-                    if self.is_outlier(particle):
-                        # delete particle and start over again
-                        self.del_from_matrix(particle)
-                        break
-
+                if self.aggregated_particles.nearest_neighbour_dist(particle.pos) > self.max_dist:
+                    self.matrix[particle.get_position()] = 0
+                    break
                 # particle takes a random step
-                particle = self.random_step(particle)
+                try:
+                    particle = self.random_step(particle)
+                except NoValidDirectionError:
+                    self.aggregated_particles.insert(particle.pos)
+                    continue
 
                 # for each neighbouring aggregated particle,
                 # the current particle has "stickiness" probability of getting aggregated
-                for _ in range(self.get_aggregated_nbr_count(particle)):
-                    if np.random.random() < self.stickiness:
-                        self.add_to_matrix(particle)
-                        self.aggregated_particles.insert(particle.pos)
-                        break
-
-            # if aggregated
+                if np.random.random() < (self.stickiness * self.get_aggregated_nbr_count(particle)):
+                    self.aggregated_particles.insert(particle.pos)
             else:
+                # if aggregated
                 # increment iteration counter
-                count += 1
-                print(f"iteration: {count}")
-                yield self.matrix, count
+                self.count += 1
+                if self.drift > 0.5:
+                    self.drift *= np.exp(-0.05 * self.count)
+                self.matrix[particle.get_position()] = 1
+                print(f"iteration: {self.count}")
+                yield self.matrix, self.count
 
     def get_boundary_indices(self) -> list:
         """
@@ -144,30 +142,21 @@ class Field(object):
         generate_particle generates a particle at a random pixel in the Field.
         :return: (Particle) a particle.
         """
-        if not self.from_edge:
-            index = np.random.randint(0, self.M * self.M)
-            while self.aggregated_particles.nearest_neighbour([index % self.M, index // self.M]) < 5:
-                index = np.random.randint(0, self.M * self.M)
-        else:
+        if self.from_edge:
             index = np.random.choice(self.boundary_indices, 1)
+            particle = Particle.from_index(index, self.M)
+        else:
+            index = list(np.random.randint(0, self.M, 2))
+            dist = self.aggregated_particles.nearest_neighbour_dist(index)
+            while dist > self.max_dist or dist < 10:
+                index = list(np.random.randint(0, self.M, 2))
+                dist = self.aggregated_particles.nearest_neighbour_dist(index)
+            particle = Particle(int(index[X]), int(index[Y]), self.M)
 
-        particle = Particle.from_index(index, self.M)
         self.matrix[particle.get_position()] = 1
         return particle
 
-    def add_to_matrix(self, particle: Particle) -> None:
-        """
-        add_to_matrix adds a particle to the Field matrix. The additions only reflect on the image.
-        It does NOT add the particle to the "self.aggregated" BST.
-        :param particle: (Particle)
-        :return: None
-        """
-        self.matrix[particle.get_position()] = 1
-
-    def del_from_matrix(self, particle: Particle) -> None:
-        self.matrix[particle.get_position()] = 0
-
-    def get_transition_probabilities(self, particle: Particle):
+    def get_unoccupied_nbr_pixels(self, particle: Particle):
         """
         This function computes the naive probability of a Particle
         landing at either of the 4 neighbouring pixels.
@@ -178,8 +167,8 @@ class Field(object):
         nbrs = particle.get_nbr_positions()
         trans_prob = np.array([1 - self.matrix[nbrs[i]] for i in range(NUM_DIRECTIONS)])
 
-        if np.sum(trans_prob) != 0:
-            return trans_prob / np.sum(trans_prob)
+        if np.sum(trans_prob) == 0:
+            raise NoValidDirectionError
         return trans_prob
 
     def get_aggregated_nbr_count(self, particle: Particle):
@@ -220,9 +209,7 @@ class Field(object):
             # push towards north
             trans_prob[[NE, N, NW]] += trans_prob[[NE, N, NW]] * self.drift
 
-        if np.sum(trans_prob) != 0:
-            return trans_prob / np.sum(trans_prob)
-        return trans_prob
+        return trans_prob / np.sum(trans_prob)
 
     def is_outlier(self, particle: Particle) -> bool:
         """

@@ -48,19 +48,20 @@ class DlaSimulation(object):
     def run(self, iterations, frame_rate, folder_name):
         # step = 0
         for matrix, count in self.field.random_walk(iterations):
-
-            img = Image.fromarray(transform_matrix(matrix))
-            imgTk = ImageTk.PhotoImage(image=img)
-
-            self.canvas.create_image(0, 0, image=imgTk, anchor='nw')
-            self.master.update()
-
             # save(img, step, folder_name)
+            # img = Image.fromarray(transform_matrix(matrix))
+            # self.update_canvas(img)
             # step += 1
-
             if count % frame_rate == 0:
+                img = Image.fromarray(transform_matrix(matrix))
+                self.update_canvas(img)
                 save(img, count, folder_name)
                 # np.save(folder_name+"/matrix/matrix.npy")
+
+    def update_canvas(self, img):
+        imgTk = ImageTk.PhotoImage(image=img)
+        self.canvas.create_image(0, 0, image=imgTk, anchor='nw')
+        self.master.update()
 
 
 if __name__ == "__main__":
