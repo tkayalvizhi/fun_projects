@@ -121,8 +121,8 @@ class Field(object):
                 # if aggregated
                 # increment iteration counter
                 self.count += 1
-                if self.drift > 0.5:
-                    self.drift *= np.exp(-0.05 * self.count)
+                # if self.drift > 0.5:
+                #     self.drift *= np.exp(-0.05 * self.count)
                 self.matrix[particle.get_position()] = 1
                 print(f"iteration: {self.count}")
                 yield self.matrix, self.count
@@ -148,7 +148,7 @@ class Field(object):
         else:
             index = list(np.random.randint(0, self.M, 2))
             dist = self.aggregated_particles.nearest_neighbour_dist(index)
-            while dist > self.max_dist or dist < 10:
+            while dist > self.max_dist or dist < 100:
                 index = list(np.random.randint(0, self.M, 2))
                 dist = self.aggregated_particles.nearest_neighbour_dist(index)
             particle = Particle(int(index[X]), int(index[Y]), self.M)
@@ -195,19 +195,20 @@ class Field(object):
             attractor = self.center.pos
         pos = particle.get_position()
 
-        if pos[X] < attractor[X]:
-            # push towards east
-            trans_prob[[NE, E, SE]] += trans_prob[[NE, E, SE]] * self.drift
+        if np.random.random() < 0.5:
+            if pos[X] < attractor[X]:
+                # push towards east
+                trans_prob[[NE, E, SE]] += trans_prob[[NE, E, SE]] * self.drift
+            else:
+                # push towards west
+                trans_prob[[NW, W, SW]] += trans_prob[[NW, W, SW]] * self.drift
         else:
-            # push towards west
-            trans_prob[[NW, W, SW]] += trans_prob[[NW, W, SW]] * self.drift
-
-        if pos[Y] < attractor[Y]:
-            # push towards south
-            trans_prob[[SE, S, SW]] += trans_prob[[SE, S, SW]] * self.drift
-        else:
-            # push towards north
-            trans_prob[[NE, N, NW]] += trans_prob[[NE, N, NW]] * self.drift
+            if pos[Y] < attractor[Y]:
+                # push towards south
+                trans_prob[[SE, S, SW]] += trans_prob[[SE, S, SW]] * self.drift
+            else:
+                # push towards north
+                trans_prob[[NE, N, NW]] += trans_prob[[NE, N, NW]] * self.drift
 
         return trans_prob / np.sum(trans_prob)
 
