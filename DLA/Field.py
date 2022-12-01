@@ -65,7 +65,7 @@ class Field(object):
         self.scale = 20
         self.count = 0
 
-    def random_step(self, particle: Particle):
+    def random_step(self, particle: Particle) -> Particle:
         """
         The particle takes a random step in the direction of the nearest aggregated particle
         The direction depends on the transition probability.
@@ -96,9 +96,12 @@ class Field(object):
             particle = self.generate_particle()
 
             while not self.aggregated_particles.contains(particle.pos):
-                yield self.matrix, self.count
+                # yield for every step
+                # yield self.matrix, self.count
 
+                # if particle is an outlier
                 if self.aggregated_particles.nearest_neighbour_dist(particle.pos) > self.max_dist:
+                    # remove particle and start over again
                     self.matrix[particle.get_position()] = 0
                     break
                 # particle takes a random step
@@ -160,11 +163,11 @@ class Field(object):
         [UP, RIGHT, DOWN, LEFT]
         """
         nbrs = particle.get_nbr_positions()
-        trans_prob = np.array([1 - self.matrix[nbrs[i]] for i in range(NUM_DIRECTIONS)])
+        unoccupied_nbrs_list = np.array([1 - self.matrix[nbrs[i]] for i in range(NUM_DIRECTIONS)])
 
-        if np.sum(trans_prob) == 0:
+        if np.sum(unoccupied_nbrs_list) == 0:
             raise NoValidDirectionError
-        return trans_prob
+        return unoccupied_nbrs_list
 
     def get_aggregated_nbr_count(self, particle: Particle):
         """
@@ -177,12 +180,12 @@ class Field(object):
 
         return int(np.sum(aggregated_nbrs))
 
-    def add_drift(self, trans_prob, particle: Particle, attractor: list = None):
+    def add_drift(self, unoccupied_nbrs, particle: Particle, attractor: list = None):
         """
         a drift towards the center, speeds up the aggregation of particles.
         With drift the directions pointing towards the center of the field are preferred more.
         :param attractor:
-        :param trans_prob: (list) of probabilites of transitioning to the 8 neighbouring pixels
+        :param unoccupied_nbrs: (list) of probabilites of transitioning to the 8 neighbouring pixels
         :param particle: (Particle)
         :return: transition probabilites with drift.
         """
@@ -193,19 +196,19 @@ class Field(object):
         if np.random.random() < 0.5:
             if pos[X] < attractor[X]:
                 # push towards east
-                trans_prob[[NE, E, SE]] += trans_prob[[NE, E, SE]] * self.drift
+                unoccupied_nbrs[[NE, E, SE]] += unoccupied_nbrs[[NE, E, SE]] * self.drift
             else:
                 # push towards west
-                trans_prob[[NW, W, SW]] += trans_prob[[NW, W, SW]] * self.drift
+                unoccupied_nbrs[[NW, W, SW]] += unoccupied_nbrs[[NW, W, SW]] * self.drift
         else:
             if pos[Y] < attractor[Y]:
                 # push towards south
-                trans_prob[[SE, S, SW]] += trans_prob[[SE, S, SW]] * self.drift
+                unoccupied_nbrs[[SE, S, SW]] += unoccupied_nbrs[[SE, S, SW]] * self.drift
             else:
                 # push towards north
-                trans_prob[[NE, N, NW]] += trans_prob[[NE, N, NW]] * self.drift
+                unoccupied_nbrs[[NE, N, NW]] += unoccupied_nbrs[[NE, N, NW]] * self.drift
 
-        return trans_prob / np.sum(trans_prob)
+        return unoccupied_nbrs / np.sum(unoccupied_nbrs)
 
     def is_outlier(self, particle: Particle) -> bool:
         """
