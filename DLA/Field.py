@@ -3,15 +3,10 @@ from Particle import Particle
 from BST import BinarySearchTree
 from bisect import bisect_right, bisect_left
 
-UP = 0
-RIGHT = 1
-DOWN = 2
-LEFT = 3
-
 X = 0
 Y = 1
 
-NW, N, NE, E, SE, S, SW, W = (i for i in range(8))
+NW, N, NE, W, E, SW, S, SE = (i for i in range(8))
 
 NUM_DIRECTIONS = 8
 SAVE = True

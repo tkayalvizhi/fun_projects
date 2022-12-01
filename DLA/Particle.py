@@ -34,14 +34,16 @@ class Particle:
         This function moves the particle in a given direction.
         The image is toroidally bound. a particle moving off the left edge enters on the right,
         a particle moving off the right edge enters on the left, similarly for top and bottom.
-        :param direction: (int) 0 - UP, 1 - RIGHT, 2 - DOWN, 3 - LEFT
+        :param direction: (int)
+                        0 - NW, 1 - N, 2 - NE,
+                        3 - W, 4 - E,
+                        5 - SW, 6 - S, 7-SE
         :return: None
         """
         update = self.update_list[direction]
 
         self.pos[X] = (self.pos[X] + update[X]) % self.M
         self.pos[Y] = (self.pos[Y] + update[Y]) % self.M
-
 
     @classmethod
     def from_index(cls, index, M):
@@ -69,5 +71,5 @@ class Particle:
         right = int((x + 1) % self.M)
 
         return [(left, up), (x, up), (right, up),
-                 (left, y), (right, y),
-                 (left, down), (x, down), (right, down)]
+                (left, y), (right, y),
+                (left, down), (x, down), (right, down)]

@@ -14,7 +14,15 @@ the particle and the aggregated particles before the random walk begins.
  If greater the particle is regenerated
  
  ## Objects
- * [Particle](Particle.py) - A particle object performs the random walk. Assumption -  It can move in any of the four cardinal directions depending on the direction specified to it. 
+ * [Particle](Particle.py) - A particle object performs the random walk. Assumption -  It can move to any of the 8 neighbouring pixels depending on the direction specified to it. 
+    - NorthWest
+    - North
+    - NorthEast
+    - East
+    - SouthEast
+    - South
+    - SouthWest
+    - West
  * [Field](Field.py) - Field / "Image" captures the particle movements and aggregation. The Field object allows certain customizations to the particle movements. Initially the field is empty with one particle at the center.
  * [DlaSimulation](dlasimulation.py) - DlaSimulation simulates the Diffusion Limited Aggregation and stores 
  images at regular intervals
