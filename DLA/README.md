@@ -1,5 +1,12 @@
 # Diffusion Limited Aggregation Simulation
+<i>" "Diffusion" because the particles forming the structure wander around randomly before attaching themselves ("Aggregating") to the structure. "Diffusion-limited" because the particles are considered to be in low concentrations so they don't come in contact with each other and the structure grows one particle at a time rather then by chunks of particles.... "</i> 
+reference: http://paulbourke.net/fractals/dla/
+
 <img src="simulation_results/sim_5_loop.gif" width="300" height="300" />
+
+## Objective:
+Computer simluate DLA. 
+
 
 Run:
 `python dlasimulation.py dimension stickiness drift max_dist iteration folder_path from_edge frame_count`
