@@ -2,9 +2,9 @@
 <img src="simulation_results/sim_5_loop.gif" width="300" height="300" />
 
 Run:
-`python dlasimulation.py dimension stickiness drift max_dist iteration folder_path`
+`python dlasimulation.py dimension stickiness drift max_dist iteration folder_path from_edge frame_count`
 
-Example: ``python dlasimulation.py 501 0.5 2 500 40000 frames``
+Example: ``python dlasimulation.py 501 0.5 2 500 40000 simulation_results/frames false 10 ``
 
 * dimension - (integer) starting from 501. Dimension of Image or Field
 * stickiness - (float) between 0 and 1. float) the stickiness factor which determines the probability of a particle aggregating
